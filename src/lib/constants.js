@@ -7,7 +7,7 @@ export const API_CONFIG = {
   LEAD_CHECK_URL: 'https://de6jvomfbm0af.cloudfront.net/public/external/check2.php?testing=0&callback=?',
   LEAD_CHECK_INTERVAL: 15000,
   OFFERS_PER_PAGE: 5,
-  MIN_WITHDRAW: 0.00,
+  MIN_WITHDRAW: 10.00,
 };
 
 export const OFFER_STYLES = [
