@@ -2,13 +2,13 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Toaster } from 'react-hot-toast';
 import toast from 'react-hot-toast';
 
-
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import OfferList from './components/OfferList';
 import Footer from './components/Footer';
 import LockedModal from './components/LockedModal';
 import WithdrawModal from './components/WithdrawModal';
+import TaskHistoryModal from './components/TaskHistoryModal';
 
 import { useOffers } from './hooks/useOffers';
 import { useLeadChecker } from './hooks/useLeadChecker';
@@ -21,6 +21,7 @@ export default function App() {
     points: 0,
     tasksCompleted: 0,
     completedTaskIds: [],
+    payoutHistory: [],
   });
 
   // --- Derived State ---
@@ -33,6 +34,7 @@ export default function App() {
   const [pendingIds, setPendingIds] = useState(new Set());
   const [lockedOpen, setLockedOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   // --- Theme ---
   const [isDark, setIsDark] = useState(() => {
@@ -64,12 +66,19 @@ export default function App() {
     (newLeads) => {
       setState((prev) => {
         const newCompletedIds = [...prev.completedTaskIds];
+        const newHistory = [...(prev.payoutHistory || [])];
         let totalNewEarnings = 0;
 
-        newLeads.forEach(({ id, amount }) => {
+        newLeads.forEach(({ id, amount, name }) => {
           if (!newCompletedIds.includes(id)) {
             newCompletedIds.push(id);
             totalNewEarnings += amount;
+            newHistory.unshift({
+              id,
+              name: name || `Offer #${id}`,
+              amount,
+              date: new Date().toISOString(),
+            });
           }
         });
 
@@ -77,10 +86,10 @@ export default function App() {
           points: prev.points + totalNewEarnings,
           tasksCompleted: prev.tasksCompleted + newLeads.length,
           completedTaskIds: newCompletedIds,
+          payoutHistory: newHistory,
         };
       });
 
-      // Remove from pending
       setPendingIds((prev) => {
         const next = new Set(prev);
         newLeads.forEach(({ id }) => next.delete(id));
@@ -93,6 +102,7 @@ export default function App() {
   useLeadChecker({
     completedIds,
     onLeadCompleted: handleLeadCompleted,
+    offers,
   });
 
   // --- Task Actions ---
@@ -123,7 +133,6 @@ export default function App() {
 
   return (
     <div className="bg-gray-100 text-gray-900 font-sans antialiased dark:bg-gray-950 dark:text-gray-100 min-h-screen flex flex-col relative overflow-x-hidden">
-      {/* Toast Provider */}
       <Toaster
         position="top-center"
         toastOptions={{
@@ -136,7 +145,6 @@ export default function App() {
         }}
       />
 
-      {/* Navigation */}
       <Navbar
         balance={state.points}
         isDark={isDark}
@@ -144,12 +152,11 @@ export default function App() {
         onWithdraw={handleOpenWithdraw}
       />
 
-      {/* Main Content */}
       <main className="flex-grow z-10 pt-14 sm:pt-16">
         <HeroSection
           balance={state.points}
           tasksCompleted={state.tasksCompleted}
-          minWithdraw={API_CONFIG.MIN_WITHDRAW}
+          onOpenHistory={() => setHistoryOpen(true)}
         />
 
         <OfferList
@@ -163,10 +170,8 @@ export default function App() {
         />
       </main>
 
-      {/* Footer */}
       <Footer />
 
-      {/* Modals */}
       <LockedModal
         isOpen={lockedOpen}
         onClose={() => setLockedOpen(false)}
@@ -179,6 +184,12 @@ export default function App() {
         onClose={() => setWithdrawOpen(false)}
         balance={state.points}
         onWithdraw={handleWithdraw}
+      />
+
+      <TaskHistoryModal
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        payoutHistory={state.payoutHistory || []}
       />
     </div>
   );

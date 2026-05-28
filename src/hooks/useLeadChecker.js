@@ -3,9 +3,12 @@ import { checkLeads } from '../lib/api';
 import { API_CONFIG } from '../lib/constants';
 import toast from 'react-hot-toast';
 
-export function useLeadChecker({ completedIds, onLeadCompleted }) {
+export function useLeadChecker({ completedIds, onLeadCompleted, offers = [] }) {
   const completedIdsRef = useRef(completedIds);
   completedIdsRef.current = completedIds;
+
+  const offersRef = useRef(offers);
+  offersRef.current = offers;
 
   const check = useCallback(async () => {
     const leads = await checkLeads();
@@ -16,9 +19,16 @@ export function useLeadChecker({ completedIds, onLeadCompleted }) {
       const idStr = String(lead.offer_id);
       if (!completedIdsRef.current.has(idStr)) {
         const dollarsEarned = parseFloat(lead.points) / 100;
-        newLeads.push({ id: idStr, amount: dollarsEarned });
+
+        // Look up the offer name from loaded offers
+        const matchedOffer = offersRef.current.find(
+          (o) => String(o.id || o.offer_id) === idStr
+        );
+        const offerName = matchedOffer?.name || `Offer #${lead.offer_id}`;
+
+        newLeads.push({ id: idStr, amount: dollarsEarned, name: offerName });
         toast.success(
-          `Payment Received! Offer #${lead.offer_id}: +$${dollarsEarned.toFixed(2)}`,
+          `+$${dollarsEarned.toFixed(2)} from ${offerName}`,
           {
             duration: 5000,
             icon: '💰',
@@ -34,7 +44,6 @@ export function useLeadChecker({ completedIds, onLeadCompleted }) {
   }, [onLeadCompleted]);
 
   useEffect(() => {
-    // Check immediately on mount
     check();
     const interval = setInterval(check, API_CONFIG.LEAD_CHECK_INTERVAL);
     return () => clearInterval(interval);

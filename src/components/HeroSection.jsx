@@ -1,111 +1,114 @@
 import { motion } from 'framer-motion';
-import { Banknote, ListChecks, Rocket } from 'lucide-react';
+import { Banknote, ListChecks, ArrowDown, Sparkles, History } from 'lucide-react';
 
-export default function HeroSection({ balance, tasksCompleted, minWithdraw }) {
-  const progressPercent = Math.min((balance / minWithdraw) * 100, 100);
+export default function HeroSection({ balance, tasksCompleted, onOpenHistory }) {
   const balanceStr = balance.toFixed(2);
+  const [dollars, cents] = balanceStr.split('.');
 
   return (
-    <section id="hero" className="relative pt-6 pb-8 sm:pt-10 sm:pb-12">
+    <section id="hero" className="relative pt-4 pb-6 sm:pt-8 sm:pb-10">
       <div className="max-w-3xl mx-auto px-4">
-        {/* Greeting */}
+
+        {/* Promo Text — Above card */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-6"
+          className="mb-5 text-center px-2"
         >
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-            Welcome back 👋
+          <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">
+            Complete Tasks.{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-teal-500">
+              Earn Real Money.
+            </span>
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-md mx-auto">
+            Download apps, do surveys, sign up for free trials, and complete simple sponsored tasks — 
+            earn real money and withdraw anytime to PayPal, crypto or your bank.
           </p>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Your Earnings
-          </h1>
         </motion.div>
 
-        {/* Balance Card - Main */}
+        {/* Balance Card — Dark */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.05 }}
-          className="relative rounded-[1.5rem] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-gray-800 dark:via-gray-750 dark:to-gray-900 p-6 sm:p-8 mb-4 overflow-hidden shadow-xl"
+          transition={{ duration: 0.5 }}
+          className="relative rounded-[1.75rem] overflow-hidden shadow-2xl"
         >
-          {/* Decorative circles */}
-          <div className="absolute -right-8 -top-8 w-40 h-40 bg-primary-500/15 rounded-full blur-2xl" />
-          <div className="absolute -left-4 -bottom-4 w-28 h-28 bg-teal-500/10 rounded-full blur-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-gray-800 dark:via-gray-900 dark:to-gray-950" />
+          <div className="absolute inset-0 opacity-[0.04]" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+            backgroundSize: '24px 24px',
+          }} />
+          <div className="absolute -right-16 -top-16 w-56 h-56 bg-primary-500/10 rounded-full blur-3xl" />
+          <div className="absolute -left-8 -bottom-12 w-40 h-40 bg-teal-500/8 rounded-full blur-3xl" />
 
-          <div className="relative">
-            <p className="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-2">
-              Total Balance
-            </p>
-            <div className="flex items-end gap-1 mb-6">
-              <span className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-none">
-                ${balanceStr}
-              </span>
-              <span className="text-primary-400 text-sm font-bold mb-1">USD</span>
+          <div className="relative px-6 py-7 sm:px-8 sm:py-9">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                  <Banknote size={16} className="text-white/80" />
+                </div>
+                <span className="text-white/50 text-sm font-semibold">Available Balance</span>
+              </div>
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ repeat: Infinity, duration: 3 }}
+                className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2.5 py-1"
+              >
+                <Sparkles size={12} className="text-primary-400" />
+                <span className="text-[11px] font-bold text-white/70">Live</span>
+              </motion.div>
             </div>
 
-            {/* Progress to withdrawal */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-400">
-                  Withdrawal progress
-                </span>
-                <span className="text-xs font-bold text-gray-300 tabular-nums">
-                  {Math.round(progressPercent)}%
+            {/* Big balance */}
+            <div className="flex items-baseline gap-0.5 mb-6">
+              <span className="text-white/40 text-3xl sm:text-4xl font-bold">$</span>
+              <span className="text-5xl sm:text-6xl font-black text-white tracking-tight leading-none">
+                {dollars}
+              </span>
+              <span className="text-white/30 text-2xl sm:text-3xl font-bold">.{cents}</span>
+            </div>
+
+            {/* Bottom row: completed + history button */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 bg-white/8 backdrop-blur-sm rounded-xl px-4 py-2.5 border border-white/5">
+                <ListChecks size={15} className="text-primary-400" />
+                <span className="text-sm font-bold text-white/70">
+                  <span className="text-white">{tasksCompleted}</span> completed
                 </span>
               </div>
-              <div className="w-full bg-gray-700/60 rounded-full h-2 overflow-hidden">
-                <motion.div
-                  className="bg-gradient-to-r from-primary-400 to-teal-400 h-full rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
-                />
-              </div>
-              <p className="text-[11px] text-gray-500 mt-1.5 font-medium">
-                ${balanceStr} of ${minWithdraw.toFixed(2)} to unlock withdrawal
-              </p>
+
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={onOpenHistory}
+                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl px-3.5 py-2.5 border border-white/5 transition-colors"
+              >
+                <History size={14} className="text-white/60" />
+                <span className="text-xs font-bold text-white/70">History</span>
+              </motion.button>
             </div>
           </div>
         </motion.div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-3">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-            className="bg-white dark:bg-gray-900/80 rounded-2xl p-4 border border-gray-200/80 dark:border-gray-800/60 shadow-sm"
-          >
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 dark:text-blue-400 flex items-center justify-center mb-2.5">
-              <ListChecks size={18} />
-            </div>
-            <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
-              Completed
-            </p>
-            <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-              {tasksCompleted}
-            </span>
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            className="bg-white dark:bg-gray-900/80 rounded-2xl p-4 border border-gray-200/80 dark:border-gray-800/60 shadow-sm"
+        {/* Scroll hint */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex justify-center mt-5"
+        >
+          <a
+            href="#tasks"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
           >
-            <div className="w-9 h-9 rounded-xl bg-primary-500/10 text-primary-500 dark:text-primary-400 flex items-center justify-center mb-2.5">
-              <Rocket size={18} />
-            </div>
-            <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">
-              Goal
-            </p>
-            <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-              ${minWithdraw.toFixed(0)}
-            </span>
-          </motion.div>
-        </div>
+            Browse offers below
+            <motion.div animate={{ y: [0, 3, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+              <ArrowDown size={13} />
+            </motion.div>
+          </a>
+        </motion.div>
       </div>
     </section>
   );
